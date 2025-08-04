@@ -1,0 +1,103 @@
+#cloud-config
+# DigitalOcean Droplet initialization script
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - git
+  - curl
+  - ufw
+
+write_files:
+  - path: /root/setup-ssl.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      DOMAIN=$1
+      if [ -z "$DOMAIN" ]; then
+        echo "Usage: ./setup-ssl.sh your-domain.com"
+        exit 1
+      fi
+      
+      # Get SSL certificate
+      certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN
+      
+      # Update nginx config
+      sed -i "s/your-domain.com/$DOMAIN/g" /root/dealflow-analytics/backend/nginx.conf
+      
+      # Copy certificates
+      cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /root/dealflow-analytics/backend/ssl/
+      cp /etc/letsencrypt/live/$DOMAIN/privkey.pem /root/dealflow-analytics/backend/ssl/
+      
+      # Restart services
+      cd /root/dealflow-analytics/backend
+      docker-compose restart nginx
+      
+      echo "SSL setup complete for $DOMAIN"
+
+  - path: /etc/cron.d/ssl-renewal
+    content: |
+      0 12 * * * root /usr/bin/certbot renew --quiet && docker-compose -f /root/dealflow-analytics/backend/docker-compose.yml restart nginx
+
+  - path: /etc/logrotate.d/dealflow
+    content: |
+      /root/dealflow-analytics/backend/logs/*.log {
+          daily
+          missingok
+          rotate 30
+          compress
+          notifempty
+          create 0644 root root
+      }
+
+runcmd:
+  # Configure firewall
+  - ufw --force enable
+  - ufw allow ssh
+  - ufw allow 80
+  - ufw allow 443
+  - ufw allow 8000
+  
+  # Create application directory
+  - mkdir -p /root/dealflow-analytics/backend
+  - mkdir -p /root/dealflow-analytics/backend/ssl
+  - mkdir -p /root/dealflow-analytics/backend/logs
+  - mkdir -p /root/dealflow-analytics/backend/reports
+  
+  # Set up Docker
+  - systemctl enable docker
+  - systemctl start docker
+  
+  # Install Docker Compose (newer version)
+  - curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - chmod +x /usr/local/bin/docker-compose
+  
+  # Create docker network
+  - docker network create dealflow-network
+  
+  # Set up swap (helpful for smaller droplets)
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  
+  # Install monitoring
+  - curl -fsSL https://get.docker.com | sh
+  - docker run -d --name=netdata --restart=always -p 19999:19999 -v /etc/passwd:/host/etc/passwd:ro -v /etc/group:/host/etc/group:ro -v /proc:/host/proc:ro -v /sys:/host/sys:ro -v /var/run/docker.sock:/var/run/docker.sock:ro --cap-add SYS_PTRACE --security-opt apparmor=unconfined netdata/netdata
+  
+  # System optimization
+  - echo "vm.swappiness=10" >> /etc/sysctl.conf
+  - echo "net.core.somaxconn=65535" >> /etc/sysctl.conf
+  - sysctl -p
+  
+  # Create deployment complete marker
+  - touch /root/deployment-ready
+
+final_message: "DealFlow Analytics Droplet is ready! SSH in and copy your application files."

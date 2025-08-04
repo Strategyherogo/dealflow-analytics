@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealFlow Analytics Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #4361ee;
+            margin-bottom: 20px;
+        }
+        .test-api {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #3f37c9;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .company-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .company-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .company-card:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        .company-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .company-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 DealFlow Analytics Demo</h1>
+        <p class="subtitle">Test the Chrome extension and API without LinkedIn</p>
+    </div>
+
+    <div class="demo-section">
+        <h2>📊 API Status</h2>
+        <p>Backend server status: <span id="server-status" class="status">Checking...</span></p>
+        <button onclick="checkHealth()">Check Health</button>
+        <button onclick="testAnalysis()">Test Analysis API</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🏢 Test Companies</h2>
+        <p>Click on any company to test the analysis:</p>
+        
+        <div class="company-list">
+            <div class="company-card" onclick="analyzeCompany('OpenAI', 'openai.com', 'Artificial Intelligence', '500')">
+                <div class="company-name">OpenAI</div>
+                <div class="company-info">AI Research • 500 employees</div>
+            </div>
+            
+            <div class="company-card" onclick="analyzeCompany('Stripe', 'stripe.com', 'Financial Services', '8000')">
+                <div class="company-name">Stripe</div>
+                <div class="company-info">Fintech • 8,000 employees</div>
+            </div>
+            
+            <div class="company-card" onclick="analyzeCompany('Airbnb', 'airbnb.com', 'Travel & Hospitality', '6000')">
+                <div class="company-name">Airbnb</div>
+                <div class="company-info">Travel • 6,000 employees</div>
+            </div>
+            
+            <div class="company-card" onclick="analyzeCompany('SpaceX', 'spacex.com', 'Aerospace', '12000')">
+                <div class="company-name">SpaceX</div>
+                <div class="company-info">Aerospace • 12,000 employees</div>
+            </div>
+            
+            <div class="company-card" onclick="analyzeCompany('Canva', 'canva.com', 'Design Software', '3500')">
+                <div class="company-name">Canva</div>
+                <div class="company-info">Design Tools • 3,500 employees</div>
+            </div>
+            
+            <div class="company-card" onclick="analyzeCompany('Databricks', 'databricks.com', 'Data & Analytics', '5000')">
+                <div class="company-name">Databricks</div>
+                <div class="company-info">Data Platform • 5,000 employees</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🧩 Extension Setup</h2>
+        <ol>
+            <li>Open Chrome and go to: <code>chrome://extensions/</code></li>
+            <li>Enable "Developer mode" (top right toggle)</li>
+            <li>Click "Load unpacked"</li>
+            <li>Select the extension folder: <code>/Users/jenyago/Desktop/Apps Factory/dealflow-analytics/extension</code></li>
+            <li>The DealFlow Analytics icon should appear in your toolbar</li>
+            <li>Visit any LinkedIn company page or use the test companies above</li>
+        </ol>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        async function checkHealth() {
+            showResults('Checking server health...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                document.getElementById('server-status').textContent = 'Online';
+                document.getElementById('server-status').className = 'status success';
+                
+                showResults(`<h3>✅ Server Health</h3><pre>${JSON.stringify(data, null, 2)}</pre>`);
+            } catch (error) {
+                document.getElementById('server-status').textContent = 'Offline';
+                document.getElementById('server-status').className = 'status error';
+                showResults(`<h3>❌ Error</h3><p>${error.message}</p>`);
+            }
+        }
+        
+        async function testAnalysis() {
+            showResults('Running test analysis...');
+            
+            const testCompany = {
+                name: "Test Company",
+                domain: "testcompany.com",
+                industry: "Technology",
+                employeeCount: "100",
+                description: "A test company for demo purposes"
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testCompany)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResults(`
+                        <h3>✅ Analysis Complete</h3>
+                        <p><strong>Investment Score:</strong> ${data.investmentScore}/100</p>
+                        <p><strong>Data Sources:</strong> ${data.dataSources.join(', ')}</p>
+                        <h4>Raw Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                } else {
+                    showResults(`<h3>❌ Error</h3><pre>${JSON.stringify(data, null, 2)}</pre>`);
+                }
+            } catch (error) {
+                showResults(`<h3>❌ Error</h3><p>${error.message}</p>`);
+            }
+        }
+        
+        async function analyzeCompany(name, domain, industry, employees) {
+            showResults(`Analyzing ${name}...`);
+            
+            const company = {
+                name: name,
+                domain: domain,
+                industry: industry,
+                employeeCount: employees,
+                description: `${name} is a leading company in the ${industry} sector.`
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(company)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    let html = `
+                        <h3>✅ ${name} Analysis</h3>
+                        <p><strong>Investment Score:</strong> ${data.investmentScore}/100</p>
+                        <p><strong>Data Sources:</strong> ${data.dataSources.join(', ')}</p>
+                    `;
+                    
+                    if (data.aiThesis) {
+                        html += `
+                            <h4>AI Investment Thesis</h4>
+                            <p><strong>Summary:</strong> ${data.aiThesis.summary}</p>
+                            <p><strong>Recommendation:</strong> ${data.aiThesis.recommendation}</p>
+                            <p><strong>Strengths:</strong></p>
+                            <ul>${data.aiThesis.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                            <p><strong>Risks:</strong></p>
+                            <ul>${data.aiThesis.risks.map(r => `<li>${r}</li>`).join('')}</ul>
+                        `;
+                    }
+                    
+                    showResults(html);
+                } else {
+                    showResults(`<h3>❌ Error</h3><pre>${JSON.stringify(data, null, 2)}</pre>`);
+                }
+            } catch (error) {
+                showResults(`<h3>❌ Error</h3><p>${error.message}</p>`);
+            }
+        }
+        
+        function showResults(content) {
+            const results = document.getElementById('results');
+            results.innerHTML = content;
+            results.style.display = 'block';
+        }
+        
+        // Check health on load
+        window.onload = () => {
+            checkHealth();
+        };
+    </script>
+</body>
+</html>

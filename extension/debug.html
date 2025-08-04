@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DealFlow Analytics Debug</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #3f37c9;
+        }
+        #results {
+            background: white;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>DealFlow Analytics Extension Debug</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Content Script</h2>
+        <button onclick="testContentScript()">Test Content Script Message</button>
+        <button onclick="checkExtensionStatus()">Check Extension Status</button>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Backend API</h2>
+        <button onclick="testBackendHealth()">Test Backend Health</button>
+        <button onclick="testAnalyzeAPI()">Test Analyze API</button>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Check Permissions</h2>
+        <button onclick="checkPermissions()">Check Chrome Permissions</button>
+    </div>
+
+    <div id="results">Results will appear here...</div>
+
+    <script>
+        function log(message) {
+            const results = document.getElementById('results');
+            results.textContent += message + '\n\n';
+        }
+
+        function clearLog() {
+            document.getElementById('results').textContent = '';
+        }
+
+        async function testContentScript() {
+            clearLog();
+            log('Testing content script communication...');
+            
+            try {
+                const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+                log(`Current tab URL: ${tab.url}`);
+                
+                chrome.tabs.sendMessage(tab.id, {action: 'getCompanyData'}, (response) => {
+                    if (chrome.runtime.lastError) {
+                        log(`ERROR: ${chrome.runtime.lastError.message}`);
+                        log('This usually means the content script is not injected in this tab.');
+                        return;
+                    }
+                    log('Response from content script:');
+                    log(JSON.stringify(response, null, 2));
+                });
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function checkExtensionStatus() {
+            clearLog();
+            log('Checking extension status...');
+            
+            // Check if extension APIs are available
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+                log(`✅ Extension ID: ${chrome.runtime.id}`);
+                log(`✅ Extension APIs are available`);
+                
+                // Check manifest
+                const manifest = chrome.runtime.getManifest();
+                log(`Extension name: ${manifest.name}`);
+                log(`Version: ${manifest.version}`);
+                log(`Permissions: ${JSON.stringify(manifest.permissions)}`);
+                log(`Content scripts: ${JSON.stringify(manifest.content_scripts, null, 2)}`);
+            } else {
+                log('❌ Extension APIs not available');
+            }
+        }
+
+        async function testBackendHealth() {
+            clearLog();
+            log('Testing backend health endpoint...');
+            
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                log(`✅ Backend is ${data.status}`);
+                log(JSON.stringify(data, null, 2));
+            } catch (error) {
+                log(`❌ Backend error: ${error.message}`);
+                log('Make sure the backend is running on port 8000');
+            }
+        }
+
+        async function testAnalyzeAPI() {
+            clearLog();
+            log('Testing analyze API...');
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'Stripe',
+                        industry: 'Financial Technology',
+                        employeeCount: '5000+'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    log(`❌ API error: ${response.status} ${response.statusText}`);
+                    log(error);
+                    return;
+                }
+                
+                const data = await response.json();
+                log('✅ Analysis successful!');
+                log(JSON.stringify(data, null, 2));
+            } catch (error) {
+                log(`❌ API error: ${error.message}`);
+            }
+        }
+
+        async function checkPermissions() {
+            clearLog();
+            log('Checking Chrome permissions...');
+            
+            try {
+                const permissions = await chrome.permissions.getAll();
+                log('Granted permissions:');
+                log(JSON.stringify(permissions, null, 2));
+                
+                // Check specific permissions
+                const hasStorage = await chrome.permissions.contains({permissions: ['storage']});
+                log(`Storage permission: ${hasStorage ? '✅' : '❌'}`);
+                
+                const hasActiveTab = await chrome.permissions.contains({permissions: ['activeTab']});
+                log(`ActiveTab permission: ${hasActiveTab ? '✅' : '❌'}`);
+                
+                const hasLinkedIn = await chrome.permissions.contains({
+                    origins: ['https://www.linkedin.com/*']
+                });
+                log(`LinkedIn permission: ${hasLinkedIn ? '✅' : '❌'}`);
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            log('Debug page loaded. Click buttons to test different components.');
+        });
+    </script>
+</body>
+</html>

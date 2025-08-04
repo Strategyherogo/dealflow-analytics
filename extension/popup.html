@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealFlow Analytics</title>
+    <link rel="stylesheet" href="css/popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DealFlow Analytics</h1>
+            <div class="status-indicator" id="status"></div>
+        </header>
+        
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Analyzing company data...</p>
+        </div>
+        
+        <div id="error" class="error hidden">
+            <p id="error-message"></p>
+            <button id="retry-btn" class="btn-secondary">Retry</button>
+        </div>
+        
+        <div id="main-content" class="main-content">
+            <div class="company-header">
+                <h2 id="company-name">No company detected</h2>
+                <p id="company-info" class="company-info"></p>
+            </div>
+            
+            <div id="company-detected" class="hidden">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Investment Score</h3>
+                        <div class="score-circle" id="investment-score">
+                            <span class="score-value">--</span>
+                            <span class="score-label">/100</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Funding History</h3>
+                        <div id="funding-history" class="metric-content">
+                            <p class="placeholder">Loading...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Growth Signals</h3>
+                        <div id="growth-signals" class="metric-content">
+                            <p class="placeholder">Loading...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Market Analysis</h3>
+                        <div id="market-analysis" class="metric-content">
+                            <p class="placeholder">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-insights">
+                    <h3>AI Investment Thesis</h3>
+                    <div id="ai-thesis" class="ai-content">
+                        <p class="placeholder">Generating AI insights...</p>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="analyze-btn" class="btn-primary">
+                        <span class="btn-text">Analyze Company</span>
+                    </button>
+                    <button id="export-pdf-btn" class="btn-secondary" disabled>
+                        Export PDF Report
+                    </button>
+                    <button id="track-btn" class="btn-secondary" disabled>
+                        Track Company
+                    </button>
+                </div>
+            </div>
+            
+            <div id="no-company" class="no-company">
+                <p>Navigate to a LinkedIn company page or Crunchbase profile to analyze</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p class="footer-text">DealFlow Analytics v1.0</p>
+        </footer>
+    </div>
+    
+    <script src="js/popup.js"></script>
+</body>
+</html>
