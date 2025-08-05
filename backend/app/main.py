@@ -109,8 +109,16 @@ from .data_sources.news_api import news_api
 
 from .analyzer import CompanyAnalyzer
 from .real_ai_analyzer import real_ai_analyzer
-from .report_generator import PDFReportGenerator
-from .enhanced_pdf_generator import EnhancedPDFReportGenerator
+
+# Optional imports - PDF generation
+try:
+    from .report_generator import PDFReportGenerator
+    from .enhanced_pdf_generator import EnhancedPDFReportGenerator
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+    print("Warning: PDF generation not available - reportlab not installed")
+
 from .real_data_sources import real_data_fetcher
 from .enhanced_data_fetcher import enhanced_intel
 from .competitive_intelligence import competitive_intel
@@ -122,8 +130,12 @@ from .hiring_tracker import HiringTracker
 
 # Initialize analyzers
 company_analyzer = CompanyAnalyzer()
-pdf_generator = PDFReportGenerator()
-enhanced_pdf_generator = EnhancedPDFReportGenerator()
+if PDF_AVAILABLE:
+    pdf_generator = PDFReportGenerator()
+    enhanced_pdf_generator = EnhancedPDFReportGenerator()
+else:
+    pdf_generator = None
+    enhanced_pdf_generator = None
 hiring_tracker = HiringTracker()
 
 @app.get("/")
@@ -343,6 +355,11 @@ async def export_pdf(request: Dict[str, Any]):
     """
     Generate PDF investment memo
     """
+    if not PDF_AVAILABLE:
+        raise HTTPException(
+            status_code=501,
+            detail="PDF generation not available. Install reportlab and matplotlib."
+        )
     try:
         # Ensure analysis data includes intelligence
         analysis_data = request["analysis"]
