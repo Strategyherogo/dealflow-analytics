@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, HttpUrl
 from typing import Optional, List, Dict, Any
 import asyncio
@@ -127,6 +127,7 @@ from .investment_signals import investment_signals
 from .social_sentiment_analyzer import social_sentiment
 from .data_metrics_engine import data_metrics_engine
 from .hiring_tracker import HiringTracker
+from .csv_exporter import CSVExporter
 
 # Initialize analyzers
 company_analyzer = CompanyAnalyzer()
@@ -391,6 +392,38 @@ async def export_pdf(request: Dict[str, Any]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
 
+@app.post("/api/export-csv")
+async def export_csv(request: Dict[str, Any]):
+    """
+    Generate CSV export of analysis data
+    Secure CSV generation with sanitization
+    """
+    try:
+        # Extract company and analysis data
+        company_data = request.get("company", {})
+        analysis_data = request.get("analysis", {})
+        
+        # Generate CSV
+        csv_data = CSVExporter.generate_analysis_csv(company_data, analysis_data)
+        
+        # Create filename
+        company_name = company_data.get("name", "Unknown").replace(" ", "_")
+        filename = f"DealFlow_{company_name}_{datetime.now().strftime('%Y%m%d')}.csv"
+        
+        # Return CSV response
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"CSV generation failed: {str(e)}")
+
 @app.post("/api/company-updates")
 async def check_company_updates(request: Dict[str, Any]):
     """
@@ -443,6 +476,15 @@ async def health_check():
         "redis": "connected" if redis_client else "disconnected",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+@app.get("/privacy-policy")
+async def privacy_policy():
+    """Serve privacy policy HTML"""
+    privacy_file = Path(__file__).parent.parent.parent / "privacy-policy.html"
+    if privacy_file.exists():
+        return FileResponse(privacy_file, media_type="text/html")
+    else:
+        raise HTTPException(status_code=404, detail="Privacy policy not found")
 
 # Rate limiting middleware
 from .middleware import RateLimitMiddleware

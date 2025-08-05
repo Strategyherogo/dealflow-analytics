@@ -20,6 +20,7 @@ const elements = {
     aiThesis: document.getElementById('ai-thesis'),
     analyzeBtn: document.getElementById('analyze-btn'),
     exportPdfBtn: document.getElementById('export-pdf-btn'),
+    exportCsvBtn: document.getElementById('export-csv-btn'),
     trackBtn: document.getElementById('track-btn'),
     retryBtn: document.getElementById('retry-btn')
 };
@@ -74,6 +75,7 @@ async function initialize() {
     // Set up event listeners
     elements.analyzeBtn.addEventListener('click', analyzeCompany);
     elements.exportPdfBtn.addEventListener('click', exportPdf);
+    elements.exportCsvBtn.addEventListener('click', exportCsv);
     elements.trackBtn.addEventListener('click', trackCompany);
     elements.retryBtn.addEventListener('click', () => location.reload());
 }
@@ -264,6 +266,7 @@ function displayAnalysisResults(data) {
     
     // Enable action buttons
     elements.exportPdfBtn.disabled = false;
+    elements.exportCsvBtn.disabled = false;
     elements.trackBtn.disabled = false;
     
     // Save to storage
@@ -314,6 +317,47 @@ async function exportPdf() {
     } finally {
         elements.exportPdfBtn.disabled = false;
         elements.exportPdfBtn.textContent = 'Export PDF Report';
+    }
+}
+
+async function exportCsv() {
+    if (!analysisData || !currentCompany) return;
+    
+    elements.exportCsvBtn.disabled = true;
+    elements.exportCsvBtn.textContent = 'Generating CSV...';
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/export-csv`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                company: currentCompany,
+                analysis: analysisData
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('CSV generation failed');
+        }
+        
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        
+        // Download the CSV
+        chrome.downloads.download({
+            url: url,
+            filename: `DealFlow_${currentCompany.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`,
+            saveAs: true
+        });
+        
+    } catch (error) {
+        console.error('CSV export error:', error);
+        showError('Failed to generate CSV. Please try again.');
+    } finally {
+        elements.exportCsvBtn.disabled = false;
+        elements.exportCsvBtn.textContent = 'Export CSV Data';
     }
 }
 

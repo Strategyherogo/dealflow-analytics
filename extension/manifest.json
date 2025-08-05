@@ -20,6 +20,11 @@
   },
   "content_scripts": [
     {
+      "matches": ["*://*.linkedin.com/*"],
+      "js": ["js/content_linkedin.js"],
+      "run_at": "document_idle"
+    },
+    {
       "matches": ["<all_urls>"],
       "js": ["js/content_final.js"],
       "run_at": "document_idle"
