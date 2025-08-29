@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealFlow Analytics - Promotional Tiles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .instructions {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px;
+        }
+        
+        .tile-container {
+            margin: 0 auto 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Small Promo Tile - 440x280 */
+        .small-tile {
+            width: 440px;
+            height: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .small-content {
+            flex: 1;
+        }
+        
+        .small-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .small-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        
+        .small-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .small-visual {
+            width: 140px;
+            height: 140px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 20px;
+        }
+        
+        .score-demo {
+            text-align: center;
+        }
+        
+        .score-num {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        .score-text {
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        
+        /* Marquee Promo Tile - 1400x560 */
+        .marquee-tile {
+            width: 1400px;
+            height: 560px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            display: flex;
+            align-items: center;
+            padding: 80px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .marquee-content {
+            flex: 1;
+            z-index: 2;
+        }
+        
+        .marquee-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .marquee-title {
+            font-size: 56px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        
+        .marquee-subtitle {
+            font-size: 24px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .features-row {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .feature-text {
+            font-size: 16px;
+        }
+        
+        .marquee-visual {
+            width: 600px;
+            height: 400px;
+            position: absolute;
+            right: 80px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        
+        .browser-mock {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .browser-header {
+            height: 36px;
+            background: #e8e8e8;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+        
+        .dots {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .red { background: #ff5f57; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #28ca42; }
+        
+        .browser-body {
+            height: calc(100% - 36px);
+            background: #f9f9f9;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .mini-popup {
+            width: 280px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 0 auto;
+        }
+        
+        .mini-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #4ade80;
+            margin-bottom: 15px;
+        }
+        
+        .mini-company {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        
+        .mini-score {
+            text-align: center;
+            padding: 15px 0;
+        }
+        
+        .mini-score-num {
+            font-size: 36px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        
+        .mini-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .mini-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #4ade80;
+            color: #1a1a2e;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        /* Alternative Marquee Design */
+        .marquee-tile-alt {
+            width: 1400px;
+            height: 560px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .center-content {
+            text-align: center;
+            color: white;
+            z-index: 2;
+        }
+        
+        .big-logo {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0 auto 30px;
+        }
+        
+        .big-title {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .big-subtitle {
+            font-size: 28px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+        
+        .bg-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 35px,
+                rgba(255,255,255,.1) 35px,
+                rgba(255,255,255,.1) 70px
+            );
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h1>🎨 DealFlow Analytics - Chrome Web Store Promotional Graphics</h1>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Each section below shows the exact dimensions required</li>
+            <li>Take screenshots using Chrome DevTools or any screenshot tool</li>
+            <li>Save as PNG or JPEG (no transparency)</li>
+            <li>Upload to Chrome Web Store</li>
+        </ol>
+        
+        <h2>Required Assets:</h2>
+        <ul>
+            <li>✅ <strong>Store Icon:</strong> Use <code>extension/icons/icon128.png</code></li>
+            <li>📸 <strong>Screenshots:</strong> Use the 5 templates from screenshot-templates.html</li>
+            <li>🎯 <strong>Small Promo Tile:</strong> 440x280 - See below</li>
+            <li>🎪 <strong>Marquee Promo Tile:</strong> 1400x560 - See below</li>
+        </ul>
+    </div>
+
+    <h2 style="text-align: center; margin: 40px 0;">Small Promo Tile (440 x 280)</h2>
+    
+    <!-- Small Promo Tile -->
+    <div class="tile-container small-tile">
+        <div class="small-content">
+            <div class="small-logo">📊</div>
+            <div class="small-title">VC Deal Analyzer</div>
+            <div class="small-subtitle">AI-powered investment analysis<br>for venture capitalists</div>
+        </div>
+        <div class="small-visual">
+            <div class="score-demo">
+                <div class="score-num">94</div>
+                <div class="score-text">Score</div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="text-align: center; margin: 40px 0;">Marquee Promo Tile - Option 1 (1400 x 560)</h2>
+    
+    <!-- Marquee Promo Tile - Option 1 -->
+    <div class="tile-container marquee-tile">
+        <div class="marquee-content">
+            <div class="marquee-logo">📊</div>
+            <div class="marquee-title">VC Deal Analyzer</div>
+            <div class="marquee-subtitle">Analyze any startup in 10 seconds using 7 AI models</div>
+            <div class="features-row">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">500+ VCs</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">74% Accuracy</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">10K+ Deals</div>
+                </div>
+            </div>
+        </div>
+        <div class="marquee-visual">
+            <div class="browser-mock">
+                <div class="browser-header">
+                    <div class="dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                </div>
+                <div class="browser-body">
+                    <div class="mini-popup">
+                        <div class="mini-header">✨ DealFlow Analytics</div>
+                        <div class="mini-company">
+                            <div style="font-weight: bold;">Stripe, Inc.</div>
+                            <div style="opacity: 0.7;">Fintech • Series G</div>
+                        </div>
+                        <div class="mini-score">
+                            <div class="mini-score-num">94</div>
+                        </div>
+                        <div class="mini-buttons">
+                            <div class="mini-btn btn-primary">Analyze</div>
+                            <div class="mini-btn btn-secondary">Export</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="text-align: center; margin: 40px 0;">Marquee Promo Tile - Option 2 (1400 x 560)</h2>
+    
+    <!-- Marquee Promo Tile - Option 2 (Centered) -->
+    <div class="tile-container marquee-tile-alt">
+        <div class="bg-pattern"></div>
+        <div class="center-content">
+            <div class="big-logo">📊</div>
+            <div class="big-title">VC Deal Analyzer</div>
+            <div class="big-subtitle">AI-Powered Investment Analysis Chrome Extension</div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value">500+</div>
+                    <div class="stat-label">Active VCs</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">10K+</div>
+                    <div class="stat-label">Deals Analyzed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">74%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">AI Models</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

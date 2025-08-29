@@ -1,6 +1,11 @@
 // DealFlow Analytics - Popup Script
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://monkfish-app-7otbm.ondigitalocean.app/api';
+
+// Import monetization
+const script = document.createElement('script');
+script.src = 'js/monetization.js';
+document.head.appendChild(script);
 
 // DOM Elements
 const elements = {

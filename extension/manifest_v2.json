@@ -1,0 +1,150 @@
+{
+  "manifest_version": 3,
+  "name": "DealFlow Analytics Pro",
+  "version": "2.0.0",
+  "description": "AI-powered investment analysis platform for VCs - analyze any company in seconds with multi-model AI",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs",
+    "downloads",
+    "notifications",
+    "contextMenus",
+    "webRequest",
+    "clipboardWrite",
+    "unlimitedStorage",
+    "idle",
+    "alarms"
+  ],
+  
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://www.crunchbase.com/*",
+    "https://pitchbook.com/*",
+    "https://www.cbinsights.com/*",
+    "https://angel.co/*",
+    "https://www.producthunt.com/*",
+    "https://github.com/*",
+    "https://twitter.com/*",
+    "https://x.com/*",
+    "https://news.ycombinator.com/*",
+    "https://techcrunch.com/*",
+    "https://www.reuters.com/*",
+    "https://www.bloomberg.com/*",
+    "http://localhost:8000/*",
+    "https://monkfish-app-7otbm.ondigitalocean.app/*",
+    "https://api.dealflow-analytics.ai/*"
+  ],
+  
+  "background": {
+    "service_worker": "js/background_enhanced.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["*://*.linkedin.com/*"],
+      "js": ["js/content_linkedin_enhanced.js"],
+      "css": ["css/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.crunchbase.com/*"],
+      "js": ["js/content_crunchbase.js"],
+      "css": ["css/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://pitchbook.com/*"],
+      "js": ["js/content_pitchbook.js"],
+      "css": ["css/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content_universal.js"],
+      "css": ["css/floating_widget.css"],
+      "run_at": "document_idle",
+      "exclude_matches": [
+        "*://mail.google.com/*",
+        "*://docs.google.com/*",
+        "*://drive.google.com/*"
+      ]
+    }
+  ],
+  
+  "action": {
+    "default_popup": "popup_enhanced.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png",
+    "256": "icons/icon256.png"
+  },
+  
+  "commands": {
+    "analyze-current": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
+      },
+      "description": "Analyze current company"
+    },
+    "open-dashboard": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "Open DealFlow dashboard"
+    },
+    "quick-search": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Quick company search"
+    }
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*",
+        "css/*",
+        "js/injected/*",
+        "html/widget.html",
+        "html/dashboard.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.dealflow-analytics.ai wss://api.dealflow-analytics.ai https://api.openai.com https://api.anthropic.com https://api.groq.com"
+  },
+  
+  "externally_connectable": {
+    "matches": [
+      "https://app.dealflow-analytics.ai/*",
+      "http://localhost:3000/*"
+    ]
+  },
+  
+  "minimum_chrome_version": "116"
+}

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DealFlow Analytics",
-  "version": "1.0.0",
-  "description": "Instant company analysis for VCs - analyze any company in 10 seconds",
+  "name": "VC Deal Analyzer - AI Investment Tracker",
+  "version": "1.0.1",
+  "description": "AI-powered Chrome extension for VCs. Instant company analysis, investment scoring & deal tracking on any website. Used by 500+ VCs.",
   "permissions": [
     "storage",
     "activeTab",
@@ -13,11 +13,18 @@
   "host_permissions": [
     "https://www.linkedin.com/*",
     "https://www.crunchbase.com/*",
-    "http://localhost:8000/*"
+    "https://monkfish-app-7otbm.ondigitalocean.app/*"
   ],
+  "homepage_url": "https://dealflowanalytics.com",
   "background": {
     "service_worker": "js/background_simple.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["js/monetization.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["*://*.linkedin.com/*"],

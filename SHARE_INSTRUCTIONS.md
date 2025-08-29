@@ -1,7 +1,7 @@
 # How to Share DealFlow Analytics
 
 ## Option 1: Direct File Sharing
-Share the file: dealflow-analytics-extension-20250805.zip
+Share the file: dealflow-analytics-extension-20250826.zip
 - Via email
 - Via Slack/Discord
 - Via Google Drive/Dropbox
@@ -9,7 +9,7 @@ Share the file: dealflow-analytics-extension-20250805.zip
 ## Option 2: GitHub Release
 1. Go to: https://github.com/Strategyherogo/dealflow-analytics/releases
 2. Click "Create a new release"
-3. Upload dealflow-analytics-extension-20250805.zip
+3. Upload dealflow-analytics-extension-20250826.zip
 4. Share the release link
 
 ## Option 3: Quick Testing Link
