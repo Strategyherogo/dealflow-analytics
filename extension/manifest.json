@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "VC Deal Analyzer - AI Investment Tracker",
-  "version": "1.0.1",
-  "description": "AI-powered Chrome extension for VCs. Instant company analysis, investment scoring & deal tracking on any website. Used by 500+ VCs.",
+  "version": "1.0.2",
+  "description": "AI-powered investment analysis for VCs. Analyze companies instantly on any website with comprehensive scoring and insights.",
   "permissions": [
     "storage",
     "activeTab",

@@ -6,28 +6,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('[DealFlow] Received message:', request);
     
     if (request.action === 'getCompanyData') {
-        // Simple extraction from page title
+        // Enhanced extraction that works on ANY website
         let companyName = 'Unknown Company';
         let companyData = {
-            source: 'unknown',
+            source: 'website',
             url: window.location.href,
-            extractedAt: new Date().toISOString()
+            extractedAt: new Date().toISOString(),
+            domain: window.location.hostname
         };
         
-        // Extract from title
-        const title = document.title;
-        if (title.includes(' | LinkedIn')) {
-            companyName = title.split(' | LinkedIn')[0].trim();
-            companyData.source = 'linkedin';
-        } else if (title.includes(' | Crunchbase')) {
-            companyName = title.split(' | Crunchbase')[0].trim();
-            companyData.source = 'crunchbase';
-        } else {
-            // For other websites, try common patterns
-            // Remove common suffixes
-            const suffixes = [
-                ' - Home', ' | Home', ' - Official Website', ' | Official Site', 
-                ' - About', ' | About', ' – Home', ' — Home', ' · Home',
+        // Extract from title - works on ANY website
+        const title = document.title || '';
+        
+        // Try to extract company name from various sources
+        if (title) {
+            if (title.includes(' | LinkedIn')) {
+                companyName = title.split(' | LinkedIn')[0].trim();
+                companyData.source = 'linkedin';
+            } else if (title.includes(' | Crunchbase')) {
+                companyName = title.split(' | Crunchbase')[0].trim();
+                companyData.source = 'crunchbase';
+            } else {
+                // For ANY other website, extract intelligently
+                // Remove common suffixes and separators
+                const suffixes = [
+                    ' - Home', ' | Home', ' - Official Website', ' | Official Site', 
+                    ' - About', ' | About', ' – Home', ' — Home', ' · Home',
                 ': Home', ' Home', ' - Welcome', ' | Welcome'
             ];
             let cleanTitle = title;
@@ -92,6 +96,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
         
         // Set company name
+        // Ensure we always have a company name (fallback to domain)
+        if (companyName === 'Unknown Company' || !companyName) {
+            // Use domain name as fallback
+            const domain = window.location.hostname.replace('www.', '');
+            const domainParts = domain.split('.');
+            if (domainParts.length > 0) {
+                companyName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1);
+            }
+        }
         companyData.name = companyName;
         
         // Extract domain

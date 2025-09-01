@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Company ABC - Load Test Page</title>
+    <meta name="description" content="Test page for DealFlow Analytics extension">
+</head>
+<body style="font-family: Arial; padding: 50px; max-width: 800px; margin: 0 auto;">
+    <h1>Test Company ABC</h1>
+    <p>This is a test page to verify the DealFlow Analytics extension works correctly.</p>
+    
+    <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>How to Test:</h2>
+        <ol>
+            <li><strong>Load the extension</strong> in Chrome (developer mode)</li>
+            <li><strong>Navigate to this page</strong> in Chrome</li>
+            <li><strong>Click the extension icon</strong> in the toolbar</li>
+            <li><strong>Verify it extracts</strong> "Test Company ABC" as the company name</li>
+            <li><strong>Click "Analyze Company"</strong> to test the API</li>
+        </ol>
+    </div>
+    
+    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>Expected Results:</h2>
+        <ul>
+            <li>✅ Extension popup opens</li>
+            <li>✅ Shows "Test Company ABC" as company name</li>
+            <li>✅ Shows usage counter (e.g., "7 of 10 analyses left")</li>
+            <li>✅ Analyze button is clickable</li>
+            <li>✅ API returns investment score</li>
+        </ul>
+    </div>
+    
+    <div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h2>Test Different Scenarios:</h2>
+        <p>Change the page title to test extraction:</p>
+        <button onclick="document.title = 'Stripe | LinkedIn'">LinkedIn Format</button>
+        <button onclick="document.title = 'Airbnb | Crunchbase'">Crunchbase Format</button>
+        <button onclick="document.title = 'Apple Inc.'">Simple Name</button>
+        <button onclick="document.title = 'Google - Home'">With Suffix</button>
+        <p>Current title: <strong id="current-title"></strong></p>
+    </div>
+    
+    <script>
+        // Update current title display
+        setInterval(() => {
+            document.getElementById('current-title').textContent = document.title;
+        }, 100);
+        
+        // Log for debugging
+        console.log('[Test Page] Loaded successfully');
+        console.log('[Test Page] Title:', document.title);
+        console.log('[Test Page] URL:', window.location.href);
+    </script>
+</body>
+</html>
