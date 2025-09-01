@@ -12,3 +12,4 @@ python-multipart==0.0.6
 lxml==4.9.3
 reportlab==4.0.7
 pandas==2.0.3
+stripe==7.0.0
