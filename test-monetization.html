@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Monetization System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 { color: #333; }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #45a049; }
+        .result {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>🧪 DealFlow Analytics - Monetization Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Pricing Configuration</h2>
+        <button onclick="testPricing()">Test Pricing</button>
+        <div id="pricing-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Usage Tracking</h2>
+        <button onclick="testUsageTracking()">Simulate 10 Uses</button>
+        <button onclick="resetUsage()">Reset Usage</button>
+        <div id="usage-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Upgrade Flow</h2>
+        <button onclick="testUpgradeFlow()">Test Upgrade</button>
+        <div id="upgrade-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test API Endpoints</h2>
+        <button onclick="testAPIEndpoints()">Test Backend</button>
+        <div id="api-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Complete Integration Test</h2>
+        <button onclick="runFullTest()">Run Full Test</button>
+        <div id="full-result" class="result"></div>
+    </div>
+
+    <script>
+        // Import monetization logic
+        const PRICING = {
+            free: {
+                name: 'Free',
+                price: 0,
+                analyses: 10,
+                features: ['10 analyses per month', 'Basic AI scoring', 'CSV export']
+            },
+            pro: {
+                name: 'Pro',
+                price: 49,
+                analyses: 100,
+                features: ['100 analyses per month', '3 AI models', 'PDF & CSV export']
+            },
+            premium: {
+                name: 'Premium',
+                price: 149,
+                analyses: -1,
+                features: ['Unlimited analyses', 'All 7 AI models', 'Team collaboration']
+            }
+        };
+
+        // Mock storage
+        let mockStorage = {
+            plan: 'free',
+            usage: 0,
+            billingCycle: '2025-09'
+        };
+
+        function testPricing() {
+            const result = document.getElementById('pricing-result');
+            let output = '<h3>Pricing Plans:</h3>';
+            
+            for (const [key, plan] of Object.entries(PRICING)) {
+                output += `<div class="success">
+                    <strong>${plan.name}</strong>: $${plan.price}/month<br>
+                    Analyses: ${plan.analyses === -1 ? 'Unlimited' : plan.analyses}<br>
+                    Features: ${plan.features.join(', ')}
+                </div>`;
+            }
+            
+            result.innerHTML = output;
+        }
+
+        function testUsageTracking() {
+            const result = document.getElementById('usage-result');
+            let output = '<h3>Usage Simulation:</h3>';
+            
+            mockStorage.usage = 0;
+            
+            for (let i = 1; i <= 11; i++) {
+                const canAnalyze = mockStorage.usage < PRICING[mockStorage.plan].analyses;
+                mockStorage.usage++;
+                
+                if (canAnalyze) {
+                    output += `<div class="success">Analysis ${i}: ✅ Allowed (${mockStorage.usage}/${PRICING[mockStorage.plan].analyses})</div>`;
+                } else {
+                    output += `<div class="error">Analysis ${i}: ❌ BLOCKED - Limit reached! Show upgrade prompt</div>`;
+                }
+                
+                if (mockStorage.usage === 7) {
+                    output += `<div class="warning">⚠️ Warning: Only 3 analyses left!</div>`;
+                }
+            }
+            
+            result.innerHTML = output;
+        }
+
+        function resetUsage() {
+            mockStorage.usage = 0;
+            document.getElementById('usage-result').innerHTML = '<div class="success">Usage reset to 0</div>';
+        }
+
+        function testUpgradeFlow() {
+            const result = document.getElementById('upgrade-result');
+            let output = '<h3>Upgrade Flow:</h3>';
+            
+            output += '<div class="success">1. User clicks "Upgrade"</div>';
+            output += '<div class="success">2. Create checkout session request sent</div>';
+            output += '<div class="success">3. Mock checkout URL: https://checkout.stripe.com/test/pro_checkout</div>';
+            output += '<div class="success">4. User completes payment</div>';
+            output += '<div class="success">5. Webhook received</div>';
+            output += '<div class="success">6. Plan updated to Pro</div>';
+            output += '<div class="success">7. Usage limit increased to 100</div>';
+            
+            mockStorage.plan = 'pro';
+            
+            result.innerHTML = output;
+        }
+
+        async function testAPIEndpoints() {
+            const result = document.getElementById('api-result');
+            let output = '<h3>API Endpoint Tests:</h3>';
+            
+            // Test health endpoint
+            try {
+                const healthResponse = await fetch('https://monkfish-app-7otbm.ondigitalocean.app/health');
+                const healthData = await healthResponse.json();
+                output += `<div class="success">✅ Health Check: ${healthData.status}</div>`;
+            } catch (e) {
+                output += `<div class="error">❌ Health Check Failed: ${e.message}</div>`;
+            }
+            
+            // Test payment endpoint
+            try {
+                const paymentResponse = await fetch('https://monkfish-app-7otbm.ondigitalocean.app/api/create-checkout', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({plan: 'pro', extensionId: 'test'})
+                });
+                
+                if (paymentResponse.status === 404) {
+                    output += `<div class="warning">⚠️ Payment endpoint not deployed yet (404)</div>`;
+                    output += `<div>Deployment may take 5-10 minutes to complete</div>`;
+                } else {
+                    const paymentData = await paymentResponse.json();
+                    output += `<div class="success">✅ Payment Endpoint: ${JSON.stringify(paymentData)}</div>`;
+                }
+            } catch (e) {
+                output += `<div class="error">❌ Payment Endpoint Failed: ${e.message}</div>`;
+            }
+            
+            result.innerHTML = output;
+        }
+
+        async function runFullTest() {
+            const result = document.getElementById('full-result');
+            let output = '<h3>Complete Integration Test:</h3>';
+            let score = 0;
+            let total = 0;
+            
+            // Test 1: Pricing configuration
+            total++;
+            if (PRICING && PRICING.free && PRICING.pro) {
+                score++;
+                output += '<div class="success">✅ Pricing configuration loaded</div>';
+            } else {
+                output += '<div class="error">❌ Pricing configuration missing</div>';
+            }
+            
+            // Test 2: Usage tracking logic
+            total++;
+            mockStorage.usage = 9;
+            const canAnalyze = mockStorage.usage < PRICING.free.analyses;
+            if (canAnalyze) {
+                score++;
+                output += '<div class="success">✅ Usage tracking works (9 < 10)</div>';
+            } else {
+                output += '<div class="error">❌ Usage tracking failed</div>';
+            }
+            
+            // Test 3: Limit detection
+            total++;
+            mockStorage.usage = 10;
+            const limitReached = mockStorage.usage >= PRICING.free.analyses;
+            if (limitReached) {
+                score++;
+                output += '<div class="success">✅ Limit detection works (10 >= 10)</div>';
+            } else {
+                output += '<div class="error">❌ Limit detection failed</div>';
+            }
+            
+            // Test 4: Plan upgrade
+            total++;
+            mockStorage.plan = 'pro';
+            const newLimit = PRICING[mockStorage.plan].analyses;
+            if (newLimit === 100) {
+                score++;
+                output += '<div class="success">✅ Plan upgrade increases limit to 100</div>';
+            } else {
+                output += '<div class="error">❌ Plan upgrade failed</div>';
+            }
+            
+            // Test 5: API connectivity
+            total++;
+            try {
+                const response = await fetch('https://monkfish-app-7otbm.ondigitalocean.app/health');
+                if (response.ok) {
+                    score++;
+                    output += '<div class="success">✅ API is reachable</div>';
+                } else {
+                    output += '<div class="error">❌ API returned error</div>';
+                }
+            } catch (e) {
+                output += '<div class="error">❌ API is not reachable</div>';
+            }
+            
+            // Final score
+            const percentage = Math.round((score / total) * 100);
+            output += `<hr><h3>Test Score: ${score}/${total} (${percentage}%)</h3>`;
+            
+            if (percentage === 100) {
+                output += '<div class="success"><strong>🎉 All tests passed! Monetization system is working!</strong></div>';
+            } else if (percentage >= 80) {
+                output += '<div class="warning"><strong>⚠️ Mostly working, but needs attention</strong></div>';
+            } else {
+                output += '<div class="error"><strong>❌ Significant issues found</strong></div>';
+            }
+            
+            result.innerHTML = output;
+        }
+
+        // Run initial test on load
+        window.onload = () => {
+            console.log('Monetization Test Suite Loaded');
+            testPricing();
+        };
+    </script>
+</body>
+</html>

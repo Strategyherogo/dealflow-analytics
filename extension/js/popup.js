@@ -2,11 +2,6 @@
 
 const API_BASE_URL = 'https://monkfish-app-7otbm.ondigitalocean.app/api';
 
-// Import monetization
-const script = document.createElement('script');
-script.src = 'js/monetization.js';
-document.head.appendChild(script);
-
 // DOM Elements
 const elements = {
     status: document.getElementById('status'),
@@ -38,6 +33,9 @@ let analysisData = null;
 document.addEventListener('DOMContentLoaded', initialize);
 
 async function initialize() {
+    // Initialize monetization display
+    await updateUsageDisplay();
+    
     // Check if we're on a supported page
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
@@ -90,6 +88,53 @@ function isSupportedPage(url) {
     return url.startsWith('http://') || url.startsWith('https://');
 }
 
+// Monetization integration
+async function updateUsageDisplay() {
+    // Wait for MonetizationManager to be available
+    if (typeof MonetizationManager === 'undefined') {
+        setTimeout(updateUsageDisplay, 100);
+        return;
+    }
+    
+    const monetization = new MonetizationManager();
+    await monetization.init();
+    
+    const usageDisplay = monetization.getUsageDisplay();
+    const usageText = document.getElementById('usage-text');
+    const usageFill = document.getElementById('usage-fill');
+    const upgradeBtn = document.getElementById('upgrade-btn');
+    
+    if (usageText) {
+        if (typeof usageDisplay === 'string') {
+            usageText.textContent = usageDisplay;
+        } else {
+            usageText.textContent = usageDisplay.text;
+            if (usageFill) {
+                usageFill.style.width = `${usageDisplay.percentage}%`;
+                usageFill.className = 'usage-fill';
+                if (usageDisplay.percentage > 80) {
+                    usageFill.classList.add('danger');
+                } else if (usageDisplay.percentage > 60) {
+                    usageFill.classList.add('warning');
+                }
+            }
+        }
+    }
+    
+    if (upgradeBtn) {
+        if (monetization.currentPlan === 'free' && monetization.usageCount >= 7) {
+            upgradeBtn.classList.remove('hidden');
+            upgradeBtn.addEventListener('click', () => {
+                monetization.initializePayment('pro');
+            });
+        }
+    }
+    
+    // Store monetization instance globally
+    window.monetizationManager = monetization;
+    return monetization;
+}
+
 function displayCompanyData(data) {
     elements.companyName.textContent = data.name || 'Unknown Company';
     elements.companyInfo.textContent = `${data.industry || 'Industry N/A'} • ${data.employeeCount || 'Size N/A'}`;
@@ -117,6 +162,18 @@ function hideError() {
 
 async function analyzeCompany() {
     if (!currentCompany) return;
+    
+    // Check monetization limits
+    if (window.monetizationManager) {
+        if (!window.monetizationManager.canAnalyze()) {
+            window.monetizationManager.showUpgradePrompt('limit_reached');
+            return;
+        }
+        // Track usage
+        await window.monetizationManager.trackUsage();
+        // Update display after tracking
+        await updateUsageDisplay();
+    }
     
     hideError();
     elements.loading.classList.remove('hidden');
