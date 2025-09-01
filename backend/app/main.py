@@ -164,9 +164,9 @@ hiring_tracker = HiringTracker()
 @app.get("/")
 async def root():
     return {
-        "message": "DealFlow Analytics API",
-        "version": "1.0.0",
-        "endpoints": ["/api/analyze", "/api/export-pdf", "/api/company-updates"]
+        "message": "DealFlow Analytics API - Enterprise Edition",
+        "version": "2.0.0",
+        "endpoints": ["/api/analyze", "/api/export-pdf", "/api/company-updates", "/api/create-checkout", "/api/verify-subscription", "/api/cancel-subscription"]
     }
 
 @app.post("/api/analyze", response_model=CompanyAnalysisResponse)
