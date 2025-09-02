@@ -15,7 +15,7 @@ services:
     
     # Build configuration
     build_command: pip install -r requirements.txt
-    run_command: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
+    run_command: uvicorn app.main_simple:app --host 0.0.0.0 --port ${PORT:-8080}
     
     # Instance configuration
     instance_count: 1
@@ -79,12 +79,4 @@ alerts:
 features:
   - buildpack-stack=ubuntu-22
 
-# Ingress configuration
-ingress:
-  rules:
-    - component:
-        name: dealflow-analytics
-      match:
-        authority: {}
-        path:
-          prefix: /
+# Ingress configuration (removed to use defaults)
